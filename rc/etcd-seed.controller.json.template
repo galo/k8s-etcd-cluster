@@ -1,0 +1,63 @@
+{
+  "apiVersion": "v1",
+  "kind": "ReplicationController",
+  "metadata": {
+    "name": "etcd-seed-controller"
+  },
+  "spec": {
+    "replicas": 3,
+    "selector": {
+      "name": "etcd",
+      "role": "seed",
+      "release": "stable",
+      "environment": "staging",
+      "tiers": "middleware"
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "name": "etcd",
+          "role": "seed",
+          "release": "stable",
+          "environment": "staging",
+          "tiers": "middleware"
+        }
+      },
+      "spec": {
+        "volumes": null,
+        "containers": [
+          {
+            "name": "etcd",
+            "image": "us.gcr.io/PROJECT_ID/docker-etcd:2.0.1",
+            "env": [ 
+              { "name": "X_ETCD_DISCOVERY", 
+                "value": "ETCD_DISCOVERY_URL"
+              }
+            ],
+            "ports": [
+              {
+                "name": "client",
+                "containerPort": 2379,
+                "protocol": "TCP"
+              },
+              {
+                "name": "peer",
+                "containerPort": 2380,
+                "protocol": "TCP"
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst",
+            "lifecycle": { 
+              "preStop": {
+                "exec": {
+                  "command": [ "/opt/k8s-hooks/prestop.sh" ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

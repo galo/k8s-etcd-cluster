@@ -1,0 +1,75 @@
+#!/bin/bash
+
+X_LOCAL_IP=$(hostname --ip-address)
+X_ETCD_NAME=$(hostname)
+X_ETCD_DATA_DIR="/opt/etcd/var/data"
+X_ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+X_ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+X_ETCD_ADVERTISE_CLIENT_URLS=http://$(hostname --ip-address):2379
+X_ETCD_INITIAL_ADVERTISE_PEER_URLS=http://$(hostname --ip-address):2380
+
+[ ! -d "${X_ETCD_DATA_DIR}" ] && mkdir -p "${X_ETCD_DATA_DIR}"
+
+if [[ "x${X_ETCD_DISCOVERY}" =~ .*"discovery.etcd.io".* ]]
+then
+	# This image was set to start with a discovery.etcd.io URL
+	# 2 options appear: 
+	#	1.	The cluster is really new. In this case, this node will 
+	#		not find itself in the existing member list
+	#	2.	This node is restarting. In this case, it already exist in 
+	# 		in the cluster and the discovery will be ignored anyway
+	# So we only process a single case, etcd managing the reboot by itself
+	echo "Starting as an initial member node of ${X_ETCD_DISCOVERY}"
+	/usr/local/bin/etcd \
+	 -name ${X_ETCD_NAME} \
+	 -data-dir ${X_ETCD_DATA_DIR} \
+	 -initial-advertise-peer-urls ${X_ETCD_INITIAL_ADVERTISE_PEER_URLS} \
+	 -listen-peer-urls ${X_ETCD_LISTEN_PEER_URLS} \
+	 -listen-client-urls ${X_ETCD_LISTEN_CLIENT_URLS} \
+	 -advertise-client-urls ${X_ETCD_ADVERTISE_CLIENT_URLS} \
+	 -discovery ${X_ETCD_DISCOVERY} \
+	 -discovery-fallback exit
+
+else
+	# As we don't have a "real" discovery URL, 
+	# We believe that X_ETCD_DISCOVERY is an existing cluster 
+	# We want a format http://<IP>:<PORT> where 
+	#    # IP is the IP or HOST of the service
+	#    # PORT is the PORT of the service
+	# Either 
+	#	1. we are a node that is restarting, and we don't need to add ourselves
+	#	2. or we are a new node, and we need to be added to the cluster
+	echo "Starting as a new node of existing cluster ${X_ETCD_DISCOVERY}"
+	# First let's see if we already are in the cluster
+	X_ETCD_INITIAL_CLUSTER_STATE="existing"
+	MEMBER_LIST="$(curl -sL ${X_ETCD_DISCOVERY}/v2/members \
+		| jq '.members[] | { name, peerURL: .peerURLs[0] }')"
+	AM_I_THERE=$( echo ${MEMBER_LIST} | grep ${X_ETCD_NAME} | wc -l )
+	if [ ${AM_I_THERE} = 0 ]
+	then
+		# I am new!! Let's add ourselves to the cluster using Member API
+		curl -s ${X_ETCD_DISCOVERY}/v2/members -XPOST \
+			-H "Content-Type: application/json" \
+			-d '{"peerURLs":["http://'"${X_LOCAL_IP}"':2380"]}'
+	fi
+	# Once we're in, we just need to build the startup list and start 
+	# Now we collect the list of peers and store it
+	# First sed adds lines 2 by 2, second replaces \n by ,
+	X_ETCD_INITIAL_CLUSTER="$(echo "${MEMBER_LIST}" \
+		| jq '.[]' | tr -d "\"" \
+		| sed -e '$!N;s/\n/=/' \
+		| sed -e ':z;N;s/\n/,/;bz')"
+	# Now we add oufselves
+	X_ETCD_INITIAL_CLUSTER="${X_ETCD_INITIAL_CLUSTER},${X_ETCD_NAME}=http://${X_LOCAL_IP}:2380"
+
+	/usr/local/bin/etcd \
+	 -name ${X_ETCD_NAME} \
+	 -data-dir ${X_ETCD_DATA_DIR} \
+	 -initial-advertise-peer-urls ${X_ETCD_INITIAL_ADVERTISE_PEER_URLS} \
+	 -listen-peer-urls ${X_ETCD_LISTEN_PEER_URLS} \
+	 -listen-client-urls ${X_ETCD_LISTEN_CLIENT_URLS} \
+	 -advertise-client-urls ${X_ETCD_ADVERTISE_CLIENT_URLS} \
+	 -initial-cluster ${X_ETCD_INITIAL_CLUSTER} \
+	 -initial-cluster-state ${X_ETCD_INITIAL_CLUSTER_STATE}
+
+fi
