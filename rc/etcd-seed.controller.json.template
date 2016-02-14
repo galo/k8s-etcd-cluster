@@ -11,7 +11,8 @@
       "role": "seed",
       "release": "stable",
       "environment": "staging",
-      "tiers": "middleware"
+      "tiers": "middleware",
+      "version": "2.1.1"
     },
     "template": {
       "metadata": {
@@ -20,7 +21,8 @@
           "role": "seed",
           "release": "stable",
           "environment": "staging",
-          "tiers": "middleware"
+          "tiers": "middleware",
+          "version": "2.1.1"
         }
       },
       "spec": {
@@ -28,7 +30,7 @@
         "containers": [
           {
             "name": "etcd",
-            "image": "us.gcr.io/PROJECT_ID/docker-etcd:2.0.1",
+            "image": "us.gcr.io/PROJECT_ID/etcd:2.1.1",
             "env": [ 
               { "name": "X_ETCD_DISCOVERY", 
                 "value": "ETCD_DISCOVERY_URL"
