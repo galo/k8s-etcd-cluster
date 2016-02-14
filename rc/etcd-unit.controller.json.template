@@ -48,8 +48,6 @@
                 "protocol": "TCP"
               }
             ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst",
             "lifecycle": { 
               "preStop": {
                 "exec": {
