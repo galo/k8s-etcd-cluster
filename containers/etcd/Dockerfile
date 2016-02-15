@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.17
+FROM phusion/baseimage:0.9.18
 
 MAINTAINER Samuel Cozannet <samuel@blended.io>, http://blended.io
 LABEL version="2.0.1"
