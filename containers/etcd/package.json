@@ -1,0 +1,17 @@
+{
+  "name": "etcd",
+  "version": "2.2.5",
+  "private": false,
+  "author": {
+    "name": "Samuel Cozannet",
+    "email": "samuel@blended.io",
+    "url": "http://blended.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SaMnCo/k8s-etcd-cluster"
+  },
+  "bugs": {
+    "url": "https://github.com/SaMnCo/k8s-etcd-cluster/issues"
+  }
+}
