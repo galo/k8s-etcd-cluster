@@ -21,7 +21,8 @@
           "role": "unit",
           "release": "stable",
           "environment": "staging",
-          "tiers": "middleware"
+          "tiers": "middleware",
+          "version": "2.2.5"
         }
       },
       "spec": {
