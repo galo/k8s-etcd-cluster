@@ -20,24 +20,22 @@
 MYNAME="$(readlink -f "$0")"
 MYDIR="$(dirname "${MYNAME}")"
 MYCONF="${MYDIR}/../etc/project.conf"
-MYLIB="${MYDIR}/../lib/bashlib.sh"
 
-for file in "${MYCONF}" "${MYLIB}" "${MYDIR}/../lib/gcelib.sh"; do
-	[ -f ${file} ] && source ${file} || { 
-		echo "Could not find required files. Exiting..."
-		exit 0
-	}
+for file in $(find ${MYDIR}/../etc -name "*.conf") $(find ${MYDIR}/../lib -name "*lib*.sh" | sort) ; do
+    echo Sourcing ${file}
+    source ${file}
+    sleep 1
 done 
 
 # Check install of all dependencies
-ensure_cmd_or_install_package_apt jq jq
+bash::lib::ensure_cmd_or_install_package_apt jq jq
 
 # Check install Google Cloud SDK 
-ensure_gcloud_or_install
-log debug ready to start...
+gce::lib::ensure_gcloud_or_install
+bash::lib::log debug ready to start...
 
 # Initialize environment
-switch_project
+gce::lib::switch_project
 
 #####################################################################
 #
