@@ -13,7 +13,7 @@ RUN \
  && touch /etc/etcd/etcd.conf \
  && chmod 0755 /opt/k8s-hooks/*.sh
  
-ENV DOCKER_ETCD_VERSION 2.1.1
+ENV DOCKER_ETCD_VERSION 2.2.5
 
 RUN apt-get update && apt-get install -yqq wget jq
 
