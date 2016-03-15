@@ -42,10 +42,14 @@ while [ "x${ETCD_DISCOVERY_URL}" = "x" ]; do
 	sleep 1
 done
 
+ETCD_VERSION=$(cat "${MYDIR}/../containers/etcd/package.json" | jq '.version' | tr -d '"')
+
 # Note we are using a different pattern in sed as the URL can contain slashes.
 for UNIT_TYPE in seed unit; do
 	sed -e s,ETCD_DISCOVERY_URL,"${ETCD_DISCOVERY_URL}",g \
 		-e s,PROJECT_ID,"${PROJECT_ID}",g \
+		-e s,DEFAULT_REGISTRY,"${DEFAULT_REGISTRY}",g \
+		-e s,ETCD_VERSION,"${ETCD_VERSION}",g \
 		${MYDIR}/../rc/etcd-"${UNIT_TYPE}".controller.json.template > ${MYDIR}/../tmp/etcd-"${UNIT_TYPE}".controller.json
 	echo ${MYDIR}/../tmp/etcd-"${UNIT_TYPE}".controller.json >> ${MYDIR}/../${TMP_FILES}
 done
