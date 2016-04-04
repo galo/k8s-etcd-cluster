@@ -12,7 +12,7 @@
       "release": "stable",
       "environment": "staging",
       "tiers": "middleware",
-      "version": "2.1.1"
+      "version": "ETCD_VERSION"
     },
     "template": {
       "metadata": {
@@ -22,7 +22,7 @@
           "release": "stable",
           "environment": "staging",
           "tiers": "middleware",
-          "version": "2.1.1"
+          "version": "ETCD_VERSION"
         }
       },
       "spec": {
@@ -30,7 +30,7 @@
         "containers": [
           {
             "name": "etcd",
-            "image": "us.gcr.io/PROJECT_ID/etcd:2.1.1",
+            "image": "DEFAULT_REGISTRY/PROJECT_ID/etcd:ETCD_VERSION",
             "env": [ 
               { "name": "X_ETCD_DISCOVERY", 
                 "value": "ETCD_DISCOVERY_URL"

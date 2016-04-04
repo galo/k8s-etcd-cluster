@@ -22,13 +22,13 @@ First you need to make sure you cloned this repo:
 	git clone https://github.com/SaMnCo/k8s-etcd-cluster etcd
 	cd etcd
 
-### Selecting your version
+### Picking your version of interest
 
-Pick the branch matching the version you want to work with: 
+Checkout the branch matching your requirement
 
 	git checkout VERSION
 
-where version can be 2.0.1, 2.2.5 or any other available in the branches. 
+where VERSION can be 2.1.1, 2.2.5 or another available in the branches. 
 
 ### Configuring Google Cloud Platform & project
 
@@ -75,7 +75,7 @@ As you know, you should only docker with your close friends. Containers run with
 
 	cd containers/etcd
 	# This is where you review the code!! 
-	docker build -q -t docker-etcd --force-rm=true .
+	docker build -q -t etcd --force-rm=true .
 	# Image gets built
 	docker tag docker-etcd us.gcr.io/<PUT YOUR GCP PROJECT ID HERE>/etcd:VERSION
 	gcloud docker push us.gcr.io/<PUT YOUR GCP PROJECT ID HERE>/etcd:VERSION
@@ -188,11 +188,10 @@ Note that many of the default etcd variables will be set in this document. Would
 
 ### Environment Variables
 
-* DOCKER_ETCD_VERSION: As explained before the etcd version can be controled via DOCKER_ETCD_VERSION. It defaults to the branch version
+* DOCKER_ETCD_VERSION: As explained before the etcd version can be controled via DOCKER_ETCD_VERSION. It defaults to the branch name. 
 * X_ETCD_DISCOVERY: This is a switch to tell the image that it needs to join an existing cluster, or that it is part of a seeding cluster. The admin shall give it either
   * a URL such as https://discovery.etcd.io/9b492c095380d442f56503174e584a2a:2379, pointing to a discovery URL on the free service by CoreOS;
   * Or a URL pointing to the etcd service within the kubernetes cluster. In our k8s case, this is hard coded in the service definition therefore to http://etcd-service.default.svc.cluster.local:2379
-
 
 ## Conclusion
 
